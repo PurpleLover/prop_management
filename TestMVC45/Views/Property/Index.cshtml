@@ -1,0 +1,188 @@
+﻿@model eAMS.Models.Models.PropRegi
+
+
+<div class="container" style="margin-top: 3%">
+    <a href="#" class="btn btn-info" onclick="AddNewProperty()">Add New Property</a>
+    <br /><br />
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Property Name</th>
+                <th>Property Code</th>
+                <th>Property Brand</th>
+                <th>Property Year</th>
+                <th>Need Maintained?</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="SetPropertyList">
+            <tr id="LoadingStatus" style="color:red"></tr>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="AlterModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="AlterModal-Title"></h4>
+                </div>
+                <div class="modal-body">
+                    <form id="form">
+                        <fieldset id="SubmitForm">
+                            @Html.HiddenFor(m => m.ID, new { @id = "PropId" })
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Name">Property Name:</label>
+                                        @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control", @placeholder = "Property Name" })
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Code">Property Code:</label>
+                                        @Html.TextBoxFor(m => m.Code, new { @id = "PropCode", @class = "form-control", @placeholder = "Property Code" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-xs-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Brand">Property Brand:</label>
+                                        @Html.TextBoxFor(m => m.Brand, new { @id = "PropBrand", @class = "form-control", @placeholder = "Property Brand" })
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label for="Year">Property Release Year:</label>
+                                        @Html.TextBoxFor(m => m.Year, new { @id = "PropYear", @class = "form-control", @placeholder = "Property Release Year" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                @Html.CheckBoxFor(m => m.IsMaitained, new { @id = "PropIMain", @class = "checkbox" })
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">Close</a>
+                    <a class="btn btn-danger" id="SaveProperty">Save Changes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="DeleteConfirmation" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Delete Property</h4>
+                </div>
+                <div class="modal-body">
+                    <h4>Are you sure? This process cannot be undone!</h4>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">Close</a>
+                    <a class="btn btn-danger" onclick="ConfirmDelete()">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script>
+    $.get("/Property/GetPropertyList", null, DataBinding);
+    $("#AlterModal").on("hidden.bs.modal", (e) => {
+        e.preventDefault();
+        $("#form")[0].reset();
+    });
+
+    function DataBinding(PropertyList) {
+        const SetData = $("#SetPropertyList");
+        for (let i = 0; i < PropertyList.length; ++i) {
+            const Data = `<tr class="row_${PropertyList[i].ID}">
+<td>${PropertyList[i].Name}</td>
+<td>${PropertyList[i].Code}</td>
+<td>${PropertyList[i].Brand}</td>
+<td>${PropertyList[i].Year}</td>
+<td>${PropertyList[i].IsMaitained ? "true" : "false"}</td>
+<td><a class="btn btn-info" onclick="EditProperty(${PropertyList[i].ID})">Edit</a></td>
+<td><a class="btn btn-danger" onclick="DeleteProperty(${PropertyList[i].ID})">Delete</a></td>
+</tr>`
+            SetData.append(Data);
+        }
+
+    }
+
+    function AddNewProperty() {
+        $("#form")[0].reset();
+        $("#PropId").val(0);
+        $("#AlterModal-Title").html("Add New Property");
+        $("#AlterModal").modal("show");
+    }
+
+    function EditProperty(PropertyId) {
+        const url = `/Property/GetPropertyById?PropertyId=${PropertyId}`;
+        $("#AlterModal-Title").html("Update Property");
+        $("#AlterModal").modal("show");
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: (data) => {
+                $("#PropId").val(data.ID);
+                $("#PropName").val(data.Name);
+                $("#PropCode").val(data.Code);
+                $("#PropBrand").val(data.Brand);
+                $("#PropYear").val(data.Year);
+                $("#PropIMain").val(data.IsMaitained);
+            },
+            error: (err) => {
+                console.log(`Error: ${err}`);
+            }
+        })
+    }
+
+    $("#SaveProperty").click(() => {
+        const data = $("#SubmitForm").serialize();
+        const url = "/Property/SavePropertyToDb";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: data,
+            success: (data) => {
+                alert("Success!");
+                window.location.href = "/Property/Index";
+                $("#AlterModal").modal("hide");
+            },
+            error: (err) => {
+                console.log(`Error: ${err}`);
+            }
+        });
+    });
+
+    function DeleteProperty(PropertyId) {
+        $("#PropId").val(PropertyId);
+        $("#DeleteConfirmation").modal("show");
+    }
+
+    function ConfirmDelete() {
+        const propertyId = $("#PropId").val();
+        const url = `/Property/DeleteProperty?PropertyId=${propertyId}`;
+        $.ajax({
+            type: "POST",
+            url: url,
+            success: () => {
+                $("#DeleteConfirmation").modal("hide");
+                $(`#row_${propertyId}`).remove();
+                window.location.href = "/Property/Index";
+            },
+            error: (err) => {
+                console.log(`Error: ${err}`);
+            }
+        });
+    }
+</script>
