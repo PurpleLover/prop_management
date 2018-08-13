@@ -16,6 +16,7 @@ namespace eAMS.BusinessNew.DbInteract
         private PROP_MNGEntities context;
         const string SUCCESSFUL = "Successful";
         const string ERROR = "Error";
+
         public string SaveProperty(PropRegi propRegi)
         {
             try
@@ -116,6 +117,19 @@ namespace eAMS.BusinessNew.DbInteract
                 throw ex;
             }
 
+        }
+
+        public List<PropRegi> SearchProperty(string propertyName)
+        {
+            try
+            {
+                context = new PROP_MNGEntities();
+                return context.PropRegis.Where(p => p.Name.Contains(propertyName) || propertyName == null).ToList();
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

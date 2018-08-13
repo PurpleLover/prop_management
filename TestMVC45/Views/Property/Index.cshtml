@@ -1,8 +1,14 @@
 ﻿@model eAMS.Models.Models.PropRegi
 
-
 <div class="container" style="margin-top: 3%">
-    <a href="#" class="btn btn-info" onclick="AddNewProperty()">Add New Property</a>
+    <div class="row">
+        <a href="#" class="btn btn-info" onclick="AddNewProperty()">Add New Property</a>
+        <div class="form-group">
+            <label>Find by Name:</label>
+            <input id="SearchProperty" class="input-sm" type="text" onkeyup="FindProperty()" placeholder="Search for Property" />
+        </div>
+    </div>
+    
     <br /><br />
 
     <table class="table table-striped">
@@ -22,47 +28,34 @@
     </table>
 
     <div class="modal fade" id="AlterModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 id="AlterModal-Title"></h4>
                 </div>
                 <div class="modal-body">
-                    <form id="form">
+                    <form id="form" class="col-sm-offset-3">
                         <fieldset id="SubmitForm">
                             @Html.HiddenFor(m => m.ID, new { @id = "PropId" })
-                            <div class="row">
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <div class="form-group">
-                                        <label for="Name">Property Name:</label>
-                                        @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control", @placeholder = "Property Name" })
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                    <div class="form-group">
-                                        <label for="Code">Property Code:</label>
-                                        @Html.TextBoxFor(m => m.Code, new { @id = "PropCode", @class = "form-control", @placeholder = "Property Code" })
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-xs-6 col-md-6 col-lg-6">
-                                    <div class="form-group">
-                                        <label for="Brand">Property Brand:</label>
-                                        @Html.TextBoxFor(m => m.Brand, new { @id = "PropBrand", @class = "form-control", @placeholder = "Property Brand" })
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-md-6 col-lg-6">
-                                    <div class="form-group">
-                                        <label for="Year">Property Release Year:</label>
-                                        @Html.TextBoxFor(m => m.Year, new { @id = "PropYear", @class = "form-control", @placeholder = "Property Release Year" })
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="form-group">
-                                @Html.CheckBoxFor(m => m.IsMaitained, new { @id = "PropIMain", @class = "checkbox" })
+                                <label for="Name">Property Name:</label>
+                                @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control", @placeholder = "Property Name" })
+                            </div>
+                            <div class="form-group">
+                                <label for="Code">Property Code:</label>
+                                @Html.TextBoxFor(m => m.Code, new { @id = "PropCode", @class = "form-control", @placeholder = "Property Code" })
+                            </div>
+                            <div class="form-group">
+                                <label for="Brand">Property Brand:</label>
+                                @Html.TextBoxFor(m => m.Brand, new { @id = "PropBrand", @class = "form-control", @placeholder = "Property Brand" })
+                            </div>
+                            <div class="form-group">
+                                <label for="Year">Property Release Year:</label>
+                                @Html.TextBoxFor(m => m.Year, new { @id = "PropYear", @class = "form-control", @placeholder = "Property Release Year" })
+                            </div>
+                            <div class="form-group">
+                                <label for="Maintain">Need Maintained?</label>
+                                @Html.CheckBoxFor(m=>m.IsMaitained, new { @id="PropIMain", @class="form-control"})
                             </div>
                         </fieldset>
                     </form>
@@ -105,14 +98,14 @@
         const SetData = $("#SetPropertyList");
         for (let i = 0; i < PropertyList.length; ++i) {
             const Data = `<tr class="row_${PropertyList[i].ID}">
-<td>${PropertyList[i].Name}</td>
-<td>${PropertyList[i].Code}</td>
-<td>${PropertyList[i].Brand}</td>
-<td>${PropertyList[i].Year}</td>
-<td>${PropertyList[i].IsMaitained ? "true" : "false"}</td>
-<td><a class="btn btn-info" onclick="EditProperty(${PropertyList[i].ID})">Edit</a></td>
-<td><a class="btn btn-danger" onclick="DeleteProperty(${PropertyList[i].ID})">Delete</a></td>
-</tr>`
+                <td>${PropertyList[i].Name}</td>
+                <td>${PropertyList[i].Code}</td>
+                <td>${PropertyList[i].Brand}</td>
+                <td>${PropertyList[i].Year}</td>
+                <td>${PropertyList[i].IsMaitained ? "true" : "false"}</td>
+                <td><a class="btn btn-info" onclick="EditProperty(${PropertyList[i].ID})">Edit</a></td>
+                <td><a class="btn btn-danger" onclick="DeleteProperty(${PropertyList[i].ID})">Delete</a></td>
+                </tr>`
             SetData.append(Data);
         }
 
@@ -148,6 +141,7 @@
 
     $("#SaveProperty").click(() => {
         const data = $("#SubmitForm").serialize();
+        console.log(data);
         const url = "/Property/SavePropertyToDb";
         $.ajax({
             type: "POST",
@@ -182,6 +176,30 @@
             },
             error: (err) => {
                 console.log(`Error: ${err}`);
+            }
+        });
+    }
+
+    function FindProperty() {
+        let searchString = $("#SearchProperty").val().toLowerCase();
+        const SetData = $("#SetPropertyList");
+        const url = `/Property/SearchPropetyByName?PropertyName=${searchString}`;
+
+        SetData.empty();
+
+        $.ajax({
+            type: 'GET',
+            url: url,
+            success: (data) => {
+                if (data.length === 0) {
+                    SetData.append(`<tr style="color:red"><td colspan="6">No Match Data</td></tr>`);
+                }
+                else {
+                    DataBinding(data);
+                }
+            },
+            error: (err) => {
+                console.log(err);
             }
         });
     }

@@ -40,5 +40,11 @@ namespace TestMVC45.Controllers
             string checkString = new RegisterInteractor().SaveProperty(property);
             return Json(checkString, JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult SearchPropetyByName(string propertyName)
+        {
+            var searchResult = new RegisterInteractor().SearchProperty(propertyName);
+            return Json(searchResult, JsonRequestBehavior.AllowGet);
+        }
     }
 }
