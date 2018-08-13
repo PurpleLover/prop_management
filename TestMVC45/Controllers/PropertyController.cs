@@ -3,6 +3,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using eAMS.BusinessNew.DbInteract;
+using eAMS.BusinessNew.Helper;
 using eAMS.Models.Models;
 
 namespace TestMVC45.Controllers
@@ -17,10 +18,11 @@ namespace TestMVC45.Controllers
             return View();
         }
 
-        public JsonResult GetPropertyList()
+        public JsonResult GetPropertyList(int pageNumber = 1, int pageSize = 5)
         {
             var list = new RegisterInteractor().ListProperty();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            var pagedData = Pagination.PageResult(list, pageNumber, pageSize);
+            return Json(pagedData, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetPropertyById(int propertyId)

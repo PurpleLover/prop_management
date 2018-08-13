@@ -79,6 +79,8 @@
   <ItemGroup>
     <Compile Include="DbInteract\MaintainancesInteractor.cs" />
     <Compile Include="DbInteract\RegisterInteractor.cs" />
+    <Compile Include="Helper\PagedData.cs" />
+    <Compile Include="Helper\Pagination.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
