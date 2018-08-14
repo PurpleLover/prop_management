@@ -9,13 +9,22 @@ namespace eAMS.BusinessNew.Helper
     {
         public static PagedData<T> PageResult<T>(this List<T> list, int PageNumber, int PageSize) where T:class
         {
-            var result = new PagedData<T>();
-            result.Data = list.Skip(PageSize * (PageNumber - 1))
-                .Take(PageSize)
-                .ToList();
-            result.TotalPages = Convert.ToInt32(Math.Ceiling((double)list.Count() / PageSize));
-            result.CurrentPages = PageNumber;
-            return result;
+            try
+            {
+                var result = new PagedData<T>
+                {
+                    Data = list.Skip(PageSize * (PageNumber - 1))
+                        .Take(PageSize)
+                        .ToList(),
+                    TotalPages = Convert.ToInt32(Math.Ceiling((double)list.Count() / PageSize)),
+                    CurrentPages = PageNumber
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

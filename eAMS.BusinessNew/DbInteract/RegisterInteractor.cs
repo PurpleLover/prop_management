@@ -94,6 +94,7 @@ namespace eAMS.BusinessNew.DbInteract
             try
             {
                 context = new PROP_MNGEntities();
+                context.Configuration.ProxyCreationEnabled = false;
                 return context.PropRegis.ToList();
             }
             catch (Exception ex)
