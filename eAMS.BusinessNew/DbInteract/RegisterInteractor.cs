@@ -50,6 +50,7 @@ namespace eAMS.BusinessNew.DbInteract
                         dbEntry.Brand = propRegi.Brand;
                         dbEntry.Year = propRegi.Year;
                         dbEntry.IsMaitained = propRegi.IsMaitained;
+                        dbEntry.MCost = propRegi.MCost;
                     }
                     message = SUCCESSFUL;
                 }
@@ -108,6 +109,7 @@ namespace eAMS.BusinessNew.DbInteract
             try
             {
                 context = new PROP_MNGEntities();
+                context.Configuration.ProxyCreationEnabled = false;
                 var dbEntry = context.PropRegis
                     .Where(p => p.ID == propertyId)
                     .FirstOrDefault();
@@ -125,6 +127,7 @@ namespace eAMS.BusinessNew.DbInteract
             try
             {
                 context = new PROP_MNGEntities();
+                context.Configuration.ProxyCreationEnabled = false;
                 IQueryable<PropRegi> keep;
                 switch (searchBy)
                 {

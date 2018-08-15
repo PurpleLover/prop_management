@@ -1,4 +1,4 @@
-﻿@*@model eAMS.Models.Models.PropRegi*@
+﻿@model eAMS.Models.Models.PropRegi
 <div class="container" style="margin-top: 3%">
     <div class="row">
         <a href="#" class="btn btn-info" onclick="AddNewProperty()">Add New Property</a>
@@ -13,7 +13,7 @@
             </select>
         </div>
     </div>
-    
+
     <br /><br />
 
     <table class="table table-striped">
@@ -41,26 +41,33 @@
                 <div class="modal-body">
                     <form id="form" class="col-sm-offset-3">
                         <fieldset id="SubmitForm">
-                            <input name="ID" id="PropId" type="hidden"/>
+                            @Html.HiddenFor(m => m.ID, new { @id = "PropId" })
                             <div class="form-group">
                                 <label for="Name">Property Name:</label>
-                                <input name="Name" id="PropName" class="form-control" type="text" />
+                                @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control" })
                             </div>
                             <div class="form-group">
                                 <label for="Code">Property Code:</label>
-                                <input name="Code" id="PropCode" class="form-control" type="text" />
+                                @Html.TextBoxFor(m => m.Code, new { @id = "PropCode", @class = "form-control" })
                             </div>
                             <div class="form-group">
                                 <label for="Brand">Property Brand:</label>
-                                <input name="Brand" id="PropBrand" class="form-control" type="text" />
+                                @Html.TextBoxFor(m => m.Brand, new { @id = "PropBrand", @class = "form-control" })
                             </div>
                             <div class="form-group">
                                 <label for="Year">Property Release Year:</label>
-                                <input name="Year" id="PropYear" class="form-control" type="text" />
+                                @Html.TextBoxFor(m => m.Year, new { @id = "PropYear", @class = "form-control" })
                             </div>
                             <div class="form-group">
                                 <label for="Maintain">Need Maintained?</label>
-                                <input name="IsMaintained" id="PropIMain" class="form-control" type="text" />
+                                <input name="IsMaintained" id="PropIMain"
+                                       class="form-control" type="checkbox"
+                                       data-toggle="collapse" data-target="#PropMCostInfo"
+                                       aria-expanded="false" aria-controls="PropMCostInfo"/>
+                            </div>
+                            <div class="collapse" id="PropMCostInfo">
+                                <label for="PropMCost">Quotation Budget:</label>
+                                @Html.TextBoxFor(m => m.MCost, new { @id = "PropMCost", @class = "form-control" })
                             </div>
                         </fieldset>
                     </form>
@@ -112,7 +119,7 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-default" data-dismiss="modal">Close</a>
+                    <a class="btn btn-default" data-dismiss="modal" id="CloseModal">Close</a>
                 </div>
             </div>
         </div>
@@ -130,6 +137,19 @@
     $("#AlterModal").on("hidden.bs.modal", (e) => {
         e.preventDefault();
         $("#form")[0].reset();
+        const IMainInput = $("#PropIMain");
+        const PropMCostInfo = $("#PropMCostInfo");
+
+        IMainInput.removeProp("checked");
+        IMainInput.attr("aria-expanded", "false");
+
+        PropMCostInfo.removeClass("collapse in").addClass("collapse");
+        PropMCostInfo.attr("aria-expanded", "false");
+        PropMCostInfo.removeProp("style");
+    });
+
+    $("#CloseModal").click((e) => {
+        e.preventDefault();
     });
 
     function DataBinding(PropertyList) {
@@ -158,8 +178,10 @@
 
     function EditProperty(PropertyId) {
         const url = `/Property/GetPropertyById?PropertyId=${PropertyId}`;
+
         $("#AlterModal-Title").html("Update Property");
         $("#AlterModal").modal("show");
+
         $.ajax({
             type: "GET",
             url: url,
@@ -169,6 +191,17 @@
                 $("#PropCode").val(data.Code);
                 $("#PropBrand").val(data.Brand);
                 $("#PropYear").val(data.Year);
+                if (data.IsMaitained) {
+                    const IMainInput = $("#PropIMain");
+                    const PropMCostInfo = $("#PropMCostInfo");
+
+                    IMainInput.prop("checked", "true");
+                    IMainInput.attr("aria-expanded", "true");
+
+                    PropMCostInfo.addClass("in");
+                    PropMCostInfo.attr("aria-expanded", "true");
+                    $("#PropMCost").val(data.MCost);
+                }
                 $("#PropIMain").val(data.IsMaitained);
             },
             error: (err) => {
@@ -178,17 +211,31 @@
     }
 
     $("#SaveProperty").click(() => {
-        const data = $("#SubmitForm").serialize();
         const url = "/Property/SavePropertyToDb";
+        if ($("#PropIMain").is(":checked")) {
+            $("#PropIMain").val(true);
+        }
+        $("#PropIMain").val(false);
+        const data = {
+            propertyId: $("#PropId").val(),
+            propertyCode: $("#PropCode").val(),
+            propertyName: $("#PropName").val(),
+            propertyBrand: $("#PropBrand").val().trim(),
+            propertyYear: $("#PropYear").val(),
+            propertyIsMaintained: $("#PropIMain").val(),
+            propertyMCost: $("#PropMCost").val()
+        };
 
         $.ajax({
             type: "POST",
             url: url,
             data: data,
             success: (data) => {
-                console.log(data);
-                alert(data);
-                window.location.href = "/Property/Index";
+                if (data !== 'Error') {
+                    window.location.href = "/Property/Index";
+                } else {
+                    alert('Error');
+                }
                 $("#AlterModal").modal("hide");
             },
             error: (err) => {
@@ -311,7 +358,7 @@
         }
 
         template = `<p>${CurrentPage} of ${TotalPage}</p>`;
-           
+
         template = template + `<ul class="pager">
             <li class="previous"><a href="#" onclick="GetPageData(${FirstPage})"><i class="fa fa-fast-backward"></i>&nbsp;First</a></li>
             <li><select ng-model="pageSize" id="selectedId"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select> </li>
@@ -354,14 +401,19 @@
                         MainInfoTitle.html(`${resData.Name} with code: ${resData.Code}`);
 
                         const resDataLength = resData.PropMaints.length;
+
                         if (resDataLength === 0) {
                             MainInfoTable.append(`<tr style="color:red"><td colspan="5">No Maitain Data Found!</td></tr>`);
                         } else {
                             for (let i = 0; i < resDataLength; i++) {
+                                const resDataCostDistance = resData.PropMaints[i].RCost - resData.MCost;
+                                const resDataCostStyle = resDataCostDistance > 0 ? 'red' : 'green';
+                                const resDataCostDistanceDisplay = resDataCostDistance > 0 ? '+' + resDataCostDistance : resDataCostDistance;
+
                                 const Data = `<tr class="row_${resData.PropMaints[i].ID}">
                                 <td>${resData.PropMaints[i].Action}</td>
-                                <td>${resData.PropMaints[i].Date}</td>
-                                <td>${resData.PropMaints[i].RCost}</td>
+                                <td>${DateFormat(resData.PropMaints[i].Date)}</td>
+                                <td style="color: ${resDataCostStyle}">${resData.PropMaints[i].RCost} (${resDataCostDistanceDisplay})</td>
                                 <td>${resData.MCost}</td>
                                 </tr>`;
                                 MainInfoTable.append(Data);
@@ -377,4 +429,15 @@
             return;
         }
     }
+
+    function DateFormat(date) {
+        const pad = val => val < 10 ? '0' + val : val;
+
+        if (date !== null && date !== '') {
+            let temp = new Date(date);
+            return pad(temp.getDate()) + '/' + pad(temp.getMonth() + 1) + '/' + pad(temp.getFullYear());
+        }
+        return 'N/A';
+    }
+
 </script>

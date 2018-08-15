@@ -1,11 +1,9 @@
-﻿using System;
-using System.Web;
-using System.Web.Http;
-using System.Web.Mvc;
-using eAMS.BusinessNew.DbInteract;
+﻿using eAMS.BusinessNew.DbInteract;
 using eAMS.BusinessNew.Helper;
 using eAMS.Models.Models;
 using Newtonsoft.Json;
+using System;
+using System.Web.Mvc;
 
 namespace TestMVC45.Controllers
 {
@@ -38,8 +36,18 @@ namespace TestMVC45.Controllers
             return Json(checkString, JsonRequestBehavior.AllowGet);
         }
         
-        public JsonResult SavePropertyToDb(PropRegi property)
+        public JsonResult SavePropertyToDb(int propertyId, string propertyCode, string propertyName, string propertyBrand, string propertyYear, bool propertyIsMaintained, int? propertyMCost)
         {
+            PropRegi property = new PropRegi
+            {
+                ID = propertyId,
+                Code = propertyCode,
+                Name = propertyName,
+                Brand = propertyBrand,
+                Year = propertyYear,
+                IsMaitained = propertyIsMaintained,
+                MCost = propertyMCost
+            };
             string checkString = new RegisterInteractor().SaveProperty(property);
             return Json(checkString, JsonRequestBehavior.AllowGet);
         }
@@ -53,7 +61,7 @@ namespace TestMVC45.Controllers
         /*
          * @Mixin means Property and Maintain
          * Only show which has IsMaintained
-         * @params: propertyNeed is only for savety checked
+         * @params: propertyNeed is only for safety checked
          */
         public ContentResult GetMixin(int propertyId, bool propertyNeed = true)
         {

@@ -23,7 +23,12 @@ namespace TestMVC45
                  name: "Property",
                  url: "{controller}/{action}/{id}",
                  defaults: new { controller = "Property", action = "Index", id = UrlParameter.Optional }
-             );
+            );
+            routes.MapRoute(
+                 name: "Maintain",
+                 url: "{controller}/{action}/{id}",
+                 defaults: new { controller = "Maintain", action = "Index", id = UrlParameter.Optional }
+            );
         }
     }
 }
