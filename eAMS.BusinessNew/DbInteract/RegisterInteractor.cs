@@ -14,8 +14,8 @@ namespace eAMS.BusinessNew.DbInteract
         }
 
         private PROP_MNGEntities context;
-        const string SUCCESSFUL = "Successful";
-        const string ERROR = "Error";
+        private const string SUCCESSFUL = "Successful";
+        private const string ERROR = "Error";
 
         public string SaveProperty(PropRegi propRegi)
         {
@@ -120,12 +120,55 @@ namespace eAMS.BusinessNew.DbInteract
 
         }
 
-        public List<PropRegi> SearchProperty(string propertyName)
+        public List<PropRegi> SearchProperty(string searchString, string searchBy)
         {
             try
             {
                 context = new PROP_MNGEntities();
-                return context.PropRegis.Where(p => p.Name.Contains(propertyName) || propertyName == null).ToList();
+                IQueryable<PropRegi> keep;
+                switch (searchBy)
+                {
+                    case "Name":
+                        {
+                            keep = context.PropRegis.Where(p => p.Name.Contains(searchString) || searchString == null);
+                            break;
+                        }
+                    case "Code":
+                        {
+                            keep = context.PropRegis.Where(p => p.Code.Contains(searchString) || searchString == null);
+                            break;
+                        }
+                    case "Brand":
+                        {
+                            keep = context.PropRegis.Where(p => p.Brand.Contains(searchString) || searchString == null);
+                            break;
+                        }
+                    case "Year":
+                        {
+                            keep = context.PropRegis.Where(p => p.Year.Contains(searchString) || searchString == null);
+                            break;
+                        }
+                    default: return context.PropRegis.Where(p => p.Name.Contains(searchString) || searchString == null).ToList();
+                }
+                return keep.ToList();
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public PropRegi ListMixin(int propertyId)
+        {
+            try
+            {
+                context = new PROP_MNGEntities();
+                context.Configuration.ProxyCreationEnabled = false;
+                var dbQuery = context.PropRegis
+                    .Where(p => p.ID == propertyId)
+                    .Include(i => i.PropMaints)
+                    .FirstOrDefault();
+                return dbQuery;
             }
             catch(Exception ex)
             {

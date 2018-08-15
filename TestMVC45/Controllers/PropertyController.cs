@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using eAMS.BusinessNew.DbInteract;
 using eAMS.BusinessNew.Helper;
 using eAMS.Models.Models;
+using Newtonsoft.Json;
 
 namespace TestMVC45.Controllers
 {
@@ -43,10 +44,33 @@ namespace TestMVC45.Controllers
             return Json(checkString, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult SearchPropetyByName(string propertyName)
+        public JsonResult SearchPropety(string searchString, string searchBy)
         {
-            var searchResult = new RegisterInteractor().SearchProperty(propertyName);
+            var searchResult = new RegisterInteractor().SearchProperty(searchString, searchBy);
             return Json(searchResult, JsonRequestBehavior.AllowGet);
+        }
+
+        /*
+         * @Mixin means Property and Maintain
+         * Only show which has IsMaintained
+         * @params: propertyNeed is only for savety checked
+         */
+        public ContentResult GetMixin(int propertyId, bool propertyNeed = true)
+        {
+            if (propertyNeed)
+            {
+
+                var list = new RegisterInteractor().ListMixin(propertyId);
+                var lol = JsonConvert.SerializeObject(list,
+                    Formatting.None,
+                    new JsonSerializerSettings() {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                    });
+
+                return Content(lol, "application/json");
+            }
+            string checkString = ERROR;
+            return Content(checkString);
         }
     }
 }
