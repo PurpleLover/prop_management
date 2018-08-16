@@ -178,5 +178,26 @@ namespace eAMS.BusinessNew.DbInteract
                 throw ex;
             }
         }
+
+        public List<PropRegi> FindPropertyByCode(string propertyCode)
+        {
+            try
+            {
+                context = new PROP_MNGEntities();
+                context.Configuration.ProxyCreationEnabled = false;
+                List<PropRegi> res = context.PropRegis
+                    .Where(p => p.Code.StartsWith(propertyCode) || propertyCode == null)
+                    .ToList();
+                if (res != null)
+                {
+                    return res;
+                }
+                else return null;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

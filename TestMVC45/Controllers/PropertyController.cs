@@ -98,5 +98,20 @@ namespace TestMVC45.Controllers
             }
             return Content(ERROR);
         }
+
+        public JsonResult GetPropertyByCode(string propertyCode)
+        {
+            bool SafetyCheck = new DataValidation().CheckRequired(propertyCode);
+            if (SafetyCheck)
+            {
+                var list = new RegisterInteractor().FindPropertyByCode(propertyCode);
+                if (list != null)
+                {
+                    return Json(list, JsonRequestBehavior.AllowGet);
+                }
+                return Json(ERROR, JsonRequestBehavior.AllowGet);
+            }
+            return Json(ERROR, JsonRequestBehavior.AllowGet);
+        }
     }
 }
