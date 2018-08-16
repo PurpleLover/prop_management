@@ -44,7 +44,7 @@
                             @Html.HiddenFor(m => m.ID, new { @id = "PropId" })
                             <div class="form-group">
                                 <label for="Name">Property Name:</label>
-                                @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control" })
+                                @Html.TextBoxFor(m => m.Name, new { @id = "PropName", @class = "form-control", required = "required" })
                             </div>
                             <div class="form-group">
                                 <label for="Code">Property Code:</label>
@@ -63,7 +63,7 @@
                                 <input name="IsMaintained" id="PropIMain"
                                        class="form-control" type="checkbox"
                                        data-toggle="collapse" data-target="#PropMCostInfo"
-                                       aria-expanded="false" aria-controls="PropMCostInfo"/>
+                                       aria-expanded="false" aria-controls="PropMCostInfo" />
                             </div>
                             <div class="collapse" id="PropMCostInfo">
                                 <label for="PropMCost">Quotation Budget:</label>
@@ -73,8 +73,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-default" data-dismiss="modal">Close</a>
-                    <a class="btn btn-danger" id="SaveProperty">Save Changes</a>
+                    <button class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button class="btn btn-danger" id="SaveProperty">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -128,7 +128,7 @@
     <div id="Paged"></div>
 </div>
 
-<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery-3.3.1.min.js"></script>
 <script>
     //$.get("/Property/GetPropertyList", null, DataBinding);
     $(document).ready(function () {
@@ -166,7 +166,6 @@
                 </tr>`;
             SetData.append(Data);
         }
-
     }
 
     function AddNewProperty() {
@@ -196,7 +195,6 @@
                     const PropMCostInfo = $("#PropMCostInfo");
 
                     IMainInput.prop("checked", "true");
-                    IMainInput.attr("aria-expanded", "true");
 
                     PropMCostInfo.addClass("in");
                     PropMCostInfo.attr("aria-expanded", "true");
@@ -210,20 +208,23 @@
         })
     }
 
-    $("#SaveProperty").click(() => {
+    $("#SaveProperty").click((e) => {
+        e.preventDefault();
+
         const url = "/Property/SavePropertyToDb";
         if ($("#PropIMain").is(":checked")) {
             $("#PropIMain").val(true);
         }
         $("#PropIMain").val(false);
+
         const data = {
-            propertyId: $("#PropId").val(),
-            propertyCode: $("#PropCode").val(),
-            propertyName: $("#PropName").val(),
+            propertyId: $("#PropId").val().trim(),
+            propertyCode: $("#PropCode").val().trim(),
+            propertyName: $("#PropName").val().trim(),
             propertyBrand: $("#PropBrand").val().trim(),
-            propertyYear: $("#PropYear").val(),
-            propertyIsMaintained: $("#PropIMain").val(),
-            propertyMCost: $("#PropMCost").val()
+            propertyYear: $("#PropYear").val().trim(),
+            propertyIsMaintained: $("#PropIMain").val().trim(),
+            propertyMCost: parseInt($("#PropMCost").val().trim())
         };
 
         $.ajax({

@@ -4,6 +4,7 @@ using eAMS.Models.Models;
 using Newtonsoft.Json;
 using System;
 using System.Web.Mvc;
+using TestMVC45.Controllers.Helper;
 
 namespace TestMVC45.Controllers
 {
@@ -26,16 +27,26 @@ namespace TestMVC45.Controllers
 
         public JsonResult GetPropertyById(int propertyId)
         {
-            var res = new RegisterInteractor().ListPropertyById(propertyId);
-            return Json(res, JsonRequestBehavior.AllowGet);
+            bool SafetyCheck = new DataValidation().CheckPropertyId(propertyId);
+            if (SafetyCheck)
+            {
+                var res = new RegisterInteractor().ListPropertyById(propertyId);
+                return Json(res, JsonRequestBehavior.AllowGet);
+            }
+            return Json(ERROR, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult DeleteProperty(int propertyId)
         {
-            string checkString = new RegisterInteractor().RemoveProperty(propertyId);
-            return Json(checkString, JsonRequestBehavior.AllowGet);
+            bool SafetyCheck = new DataValidation().CheckPropertyId(propertyId);
+            if (SafetyCheck)
+            {
+                string checkString = new RegisterInteractor().RemoveProperty(propertyId);
+                return Json(checkString, JsonRequestBehavior.AllowGet);
+            }
+            return Json(ERROR, JsonRequestBehavior.AllowGet);
         }
-        
+
         public JsonResult SavePropertyToDb(int propertyId, string propertyCode, string propertyName, string propertyBrand, string propertyYear, bool propertyIsMaintained, int? propertyMCost)
         {
             PropRegi property = new PropRegi
@@ -48,8 +59,16 @@ namespace TestMVC45.Controllers
                 IsMaitained = propertyIsMaintained,
                 MCost = propertyMCost
             };
-            string checkString = new RegisterInteractor().SaveProperty(property);
-            return Json(checkString, JsonRequestBehavior.AllowGet);
+            bool SafetyCheck = new DataValidation().Check(property);
+
+            if (SafetyCheck)
+            {
+                string checkString = new RegisterInteractor().SaveProperty(property);
+                return Json(checkString, JsonRequestBehavior.AllowGet);
+            } else
+            {
+                return Json(ERROR, JsonRequestBehavior.AllowGet);
+            }
         }
 
         public JsonResult SearchPropety(string searchString, string searchBy)
@@ -65,9 +84,9 @@ namespace TestMVC45.Controllers
          */
         public ContentResult GetMixin(int propertyId, bool propertyNeed = true)
         {
-            if (propertyNeed)
+            bool SafetyCheck = new DataValidation().CheckPropertyId(propertyId);
+            if (propertyNeed && SafetyCheck)
             {
-
                 var list = new RegisterInteractor().ListMixin(propertyId);
                 var lol = JsonConvert.SerializeObject(list,
                     Formatting.None,
@@ -77,8 +96,7 @@ namespace TestMVC45.Controllers
 
                 return Content(lol, "application/json");
             }
-            string checkString = ERROR;
-            return Content(checkString);
+            return Content(ERROR);
         }
     }
 }
