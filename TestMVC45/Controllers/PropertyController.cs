@@ -5,6 +5,10 @@ using Newtonsoft.Json;
 using System;
 using System.Web.Mvc;
 using TestMVC45.Controllers.Helper;
+using ClosedXML.Excel;
+using System.Web.UI.WebControls;
+using System.IO;
+using System.Web.UI;
 
 namespace TestMVC45.Controllers
 {
@@ -112,6 +116,28 @@ namespace TestMVC45.Controllers
                 return Json(ERROR, JsonRequestBehavior.AllowGet);
             }
             return Json(ERROR, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult ExportToExcel()
+        {
+            var list = new RegisterInteractor().ListProperty();
+            var gv = new GridView
+            {
+                DataSource = list
+            };
+            gv.DataBind();
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment; filename=DemoExcel.xls");
+            Response.ContentType = "application/ms-excel";
+            Response.Charset = "";
+            StringWriter objStringWriter = new StringWriter();
+            HtmlTextWriter objHtmlTextWriter = new HtmlTextWriter(objStringWriter);
+            gv.RenderControl(objHtmlTextWriter);
+            Response.Output.Write(objStringWriter.ToString());
+            Response.Flush();
+            Response.End();
+            return View("Index");
         }
     }
 }
