@@ -10,7 +10,7 @@ namespace TestMVC45.Controllers.Helper
     {
         public bool CheckPropertyId(int propertyId)
         {
-            return propertyId < 0;
+            return propertyId < 0 ? false : true;
         }
 
         public bool CheckPropertyName(string propertyName)
@@ -33,7 +33,7 @@ namespace TestMVC45.Controllers.Helper
 
         public bool CheckRequired(string any)
         {
-            return String.IsNullOrEmpty(any);
+            return String.IsNullOrEmpty(any) ? false : true;
         }
 
         public bool Check(PropRegi property)
